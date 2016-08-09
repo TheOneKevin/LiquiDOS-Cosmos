@@ -13,8 +13,12 @@ namespace LiquiDOS
         #region Variables
 
         Sys.FileSystem.CosmosVFS fs;
-        private string cd = @"0:\";
+        public static string cd = @"0:\";
         private List<string> commandHistory = new List<string>();
+        static string s1 = "               Copyright (c) 2016 Kevin Dai All Rights Reserved.";
+        static string s2 = "         Currently under development. Not responsible for any damages.";
+        static string s3 = "                           Proceed at your own risk.";
+        static string s4 = "          Welcome to LquiDOS.Type help [pg #] for a list of commands.";
 
         #endregion
 
@@ -28,40 +32,49 @@ namespace LiquiDOS
             fs.Initialize();
             //Display welcome message
             Cosmos.System.Kernel.PrintDebug("Kernel loaded sucessfully!");
-            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Loading complete...");
-            Console.WriteLine("Currently under development. Not responsible for any damages. Proceed at your own risk.");
-            Console.WriteLine("Copyright (c) 2016 Kevin Dai All Rights Reserved.");
-            Console.WriteLine("             Welcome to LquiDOS. Type help for a list of commands.");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine(s1);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(s2);
+            Console.WriteLine(s3);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(s4);
             Console.ForegroundColor = ConsoleColor.White;
         }
 
         protected override void Run()
         {
             //Init the console. Get the current dir (cd)
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(cd); Console.ForegroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write(cd); Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("> "); Console.ForegroundColor = ConsoleColor.White;
             var input = Console.ReadLine();
             commandHistory.Add(input);
-            switch (input.Trim().Split(' ')[0])
+            try
             {
-                case "help": help(input); break;
-                case "ls": dir(); break;
-                case "fs": listDrives(); break;
-                case "clear": clear(); break;
-                case "reboot": reboot(); break;
-                case "dev": dev(); break;
-                case "open": openFile(input); break;
-                case "echo": echo(input); break;
-                case "cd": cdDir(input); break;
-                case "utime": time(); date(); break;
-                case "mkdir": mkdir(input); break;
-                case "rm": rm(input); break;
+                switch (input.Trim().Split(' ')[0])
+                {
+                    case "help": help(input); break;
+                    case "ls": dir(); break;
+                    case "fs": listDrives(); break;
+                    case "clear": clear(); break;
+                    case "reboot": reboot(); break;
+                    case "dev": dev(); break;
+                    case "open": openFile(input); break;
+                    case "echo": echo(input); break;
+                    case "cd": cdDir(input); break;
+                    case "utime": time(); date(); break;
+                    case "mkdir": mkdir(input); break;
+                    case "rm": rm(input); break;
+                    case "rmdir": rmdir(input); break;
+                    case "nano": nano(input); break;
 
-                default: error(input); break;
+                    default: error(input); break;
+                }
             }
+            catch(Exception e) { Console.WriteLine(e.Message); }
         }
 
         private void help(string input)
@@ -70,25 +83,30 @@ namespace LiquiDOS
             Console.WriteLine("File operations are currently under development. Use at your own risk.");
             Console.ForegroundColor = ConsoleColor.White;
             //Have multiple help pages the screen doesn't overflow :)
-            int i = 0;
+            string i = "";
             if (input.Split(' ').Length >= 2)
-                int.TryParse(input.Split(' ')[1], out i);
+               i = input.Split(' ')[1];
             switch (i)
             {
-                case 0:
-                    Console.WriteLine("help:   Shows this list again.");
+                case "0":
+                    Console.WriteLine("help:   Shows this list again. Usage help [pg#]");
                     Console.WriteLine("ls:     Shows list of files and directories.");
                     Console.WriteLine("fs:     Lists all the drives.");
-                    Console.WriteLine("rm:     Removes the directory/file. Usage: rm [path]");
+                    Console.WriteLine("rm:     Removes the file. Usage: rm [path]");
+                    Console.WriteLine("rmdir   Removes the directory. Usage: rmdir [path]");
                     Console.WriteLine("cd:     Change the current directory. Usage: cd [path]");
                     Console.WriteLine("mkdir:  Makes a directory. Usage: mkdir [patn]");
                     Console.WriteLine("open:   Opens and displays contents of a file. Usage: open [path]");
+                    Console.WriteLine("nano:   Opens and edit the contents of a file. Usage: nano [path]");
                     Console.WriteLine("reboot: Reboots the computer.");
                     Console.WriteLine("clear:  Clear the screen.");
                     Console.WriteLine("echo:   Echoes an input. Usage: echo [text to echo]");
                     Console.WriteLine("utime:  Returns unix style time.");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("For more commands, type help [page number]");
+                    Console.ForegroundColor = ConsoleColor.White;
                     break;
-                case 1:
+                case "1":
                     break;
                 default: break;
             }
@@ -99,24 +117,47 @@ namespace LiquiDOS
 
         #region File Operations
 
-        private void rm(string input)
+        private void mkfile(string input)
+        {
+
+        }
+
+        private void rmdir(string input)
         {
             //Remove a dir
-            string[] path = input.Trim().Split(' ');
+            string path = input.Trim().Substring(5).Trim(); //rmdir <- 5 chars
             if (path.Length >= 2)
             {
                 try
                 {
-                    if (VFSManager.DirectoryExists(cd + path[1]))
-                        VFSManager.DeleteFile(cd + path[1]);
-                    else if (VFSManager.DirectoryExists(path[1]))
-                        VFSManager.DeleteFile(path[1]);
-                    else if(VFSManager.FileExists(cd + path[1]))
-                        VFSManager.DeleteFile(cd + path[1]);
-                    else if(VFSManager.FileExists(path[1]))
-                        VFSManager.DeleteFile(path[1]);
+                    if (VFSManager.DirectoryExists(cd + path))
+                        VFSManager.DeleteFile(cd + path);
+                    else if (VFSManager.DirectoryExists(path))
+                        VFSManager.DeleteFile(path);
                     else
-                        Console.WriteLine("File/Directory does not exist " + cd + path[1]);
+                        Console.WriteLine("File does not exist " + cd + path);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+        }
+
+        private void rm(string input)
+        {
+            //Remove a file
+            string path = input.Trim().Substring(2).Trim(); //rm <- 2 chars
+            if (path.Length >= 2)
+            {
+                try
+                {
+                    if(VFSManager.FileExists(cd + path))
+                        VFSManager.DeleteFile(cd + path);
+                    else if(VFSManager.FileExists(path))
+                        VFSManager.DeleteFile(path);
+                    else
+                        Console.WriteLine("File does not exist " + cd + path);
                 }
                 catch (Exception e){
                     Console.WriteLine(e.Message);
@@ -127,17 +168,17 @@ namespace LiquiDOS
         private void mkdir(string input)
         {
             //Create a dir
-            string[] path = input.Trim().Split(' ');
+            string path = input.Trim().Substring(5).Trim(); //mkdir <- 5 chars
             if (path.Length >= 2)
             {
                 try
                 {
-                    if (!VFSManager.DirectoryExists(cd + path[1]))
-                        fs.CreateDirectory(cd + path[1]);
-                    else if (!VFSManager.DirectoryExists(path[1]))
-                        fs.CreateDirectory(path[1]);
+                    if (!VFSManager.DirectoryExists(cd + path))
+                        fs.CreateDirectory(cd + path);
+                    else if (!VFSManager.DirectoryExists(path))
+                        fs.CreateDirectory(path);
                     else
-                        Console.WriteLine("File/Directory already exists " + cd + path[1]);
+                        Console.WriteLine("File/Directory already exists " + cd + path);
                 }
                 catch(Exception e) { 
                     Console.WriteLine(e.Message);
@@ -148,46 +189,47 @@ namespace LiquiDOS
         private void cdDir(string input)
         {
             //Change the current dir
-            string[] path = input.Trim().Split(' ');
-            if(path.Length >= 2)
+            string path = input.Trim().Substring(2).Trim(); //cd <- 2 chars
+            try
             {
-                try
-                {
-                    if (VFSManager.DirectoryExists(cd + path[1]))
-                        cd = cd + path[1];
-                    else if (VFSManager.DirectoryExists(path[1]))
-                        cd = path[1];
-                    else
-                        Console.WriteLine("File does not exist " + cd + path[1]);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+                if (VFSManager.DirectoryExists(cd + path))
+                    cd = cd + path;
+                else if (VFSManager.DirectoryExists(path))
+                    cd = path;
+                else
+                    Console.WriteLine("File does not exist " + cd + path[1]);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
         private void openFile(string input)
         {
-            string lines = "";
-            string[] path = input.Trim().Split(' ');
+            string path = input.Trim().Substring(4).Trim(); //open <- 4 chars
             if (path.Length >= 2)
             {
                 try
                 {
-                    if (File.Exists(cd + path[1]))
-                        lines = File.ReadAllText(cd + path[1]);
-                    else if (File.Exists(path[1]))
-                        lines = File.ReadAllText(path[1]);
+                    if (File.Exists(cd + path))
+                    {
+                        foreach (string s in File.ReadAllLines(cd + path))
+                            Console.WriteLine(s);
+                    }
+                    else if (File.Exists(path))
+                    {
+                        foreach (string s in File.ReadAllLines(path))
+                            Console.WriteLine(s);
+                    }
                     else
-                        Console.WriteLine("File does not exist: " + cd + path[1]);
+                        Console.WriteLine("File does not exist: " + cd + path);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
             }
-            Console.Write(lines + "\n");
         }
 
 
@@ -198,20 +240,26 @@ namespace LiquiDOS
 
         private void dir()
         {
-            if (VFSManager.GetDirectoryListing(cd).Count >= 1)
-            {
-                foreach (var s in fs.GetDirectoryListing(cd))
+            try {
+                if (VFSManager.GetDirectoryListing(cd).Count >= 1)
                 {
-                    if (File.Exists(s.mFullPath))
-                        Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    else
+                    foreach (var s in fs.GetDirectoryListing(cd))
+                    {
+                        if (File.Exists(s.mFullPath))
+                            Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        else
+                            Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine(s.mFullPath);
                         Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine(s.mFullPath);
-                    Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }
+                else
+                    Console.WriteLine("No files/folders in this directory.");
             }
-            else
-                Console.WriteLine("No files/folders in this directory.");
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private void dev()
@@ -244,13 +292,43 @@ namespace LiquiDOS
             Console.ForegroundColor = ConsoleColor.White;
         }
 
-        private void clear()
+        public static void clear()
         {
             Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine(s1);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(s2);
+            Console.WriteLine(s3);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Copyright (c) 2016 Kevin Dai, all rights reserved.");
-            Console.WriteLine("Welcome to LquiDOS. Type help for a list of commands.");
+            Console.WriteLine(s4);
             Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        private void nano(string input)
+        {
+            //Remove a dir
+            string path = input.Trim().Substring(4).Trim(); //nano <- 4 chars
+            if (path.Length >= 2)
+            {
+                try
+                {
+                    FileManager fm = new FileManager();
+                    if (File.Exists(cd + path))
+                        fm.initNano(cd + path);
+                    else if (File.Exists(path))
+                        fm.initNano(path);
+                    else
+                    {
+                        fs.CreateFile(cd + path);
+                        fm.initNano(cd + path);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
         }
 
         private void reboot(){ Sys.Power.Reboot(); }
@@ -259,6 +337,5 @@ namespace LiquiDOS
         private void date() { Console.WriteLine("Date is (M/D/Y): " + Time.Month() + "/" + Time.DayOfMonth() + "/" + Time.Century() + Time.Year() + " Day: " + Time.DayOfWeek()); }
 
         #endregion
-
     }
 }
