@@ -12,15 +12,13 @@ namespace LiquiDOS
     class FileManager
     {
         char[] ch = new char[80]; int pointer = 0; //Dirty
-        List<string> lines = new List<string>();
-        private void writeToFile(string[] line, string path)
+        List<string> lines = new List<string>(); string[] line;
+        private void writeToFile(string path)
         {
 			try
             {
-                //arrayCheck(line); //Works!
-                //Only saves one line..?
-                //Tried WriteAllLines with string[] but that failed....
-                File.WriteAllLines(path, arrayCheck(line)); //Something went awry here...
+                //File.WriteAllLines(path, new string[] { "hello", "world" }); //<- Multiline saved!
+                File.WriteAllText(path, arrayToText()); //Array to text (stripped from Cosmos) is BAD!
 			}
 			catch (Exception e){ Console.WriteLine(e.Message); }
         }
@@ -58,9 +56,10 @@ namespace LiquiDOS
                     if(c.Key == ConsoleKey.X)
 					{
 						Kernel.clear();
-                        lines.Add(new string(ch));
+                        lines.Add(new string(ch).Trim());
                         listCheck();
-                        writeToFile(lines.ToArray(), path);
+                        line = lines.ToArray();
+                        writeToFile(path);
                         break;
 					}
                 }
@@ -73,8 +72,9 @@ namespace LiquiDOS
                     //To delete, we move the cursor, place a whitespace, move the cursor again, replace the char inside the array with whitespace
                     case ConsoleKey.Backspace: if (Console.CursorLeft >= 1) { Console.CursorLeft -= 1; Console.Write(" ");  Console.CursorLeft -= 1; pointer--; ch[pointer] = ' '; }  break;
                     case ConsoleKey.Delete: if (Console.CursorLeft >= 1) { Console.CursorLeft -= 1; Console.Write(" "); Console.CursorLeft -= 1; pointer--; ch[pointer] = ' '; } break;
-                    case ConsoleKey.Enter: Console.Write("\n"); ch[pointer] = '\n';
-                        lines.Add(new string(ch)); cleanArray(ch); Kernel.PrintDebug(lines.Count + ""); break; //Increase line number, store line, clean line array, next line
+                    case ConsoleKey.Enter: Console.Write("\n");
+                        lines.Add(new string(ch).Trim()); cleanArray(ch); Kernel.PrintDebug(lines.Count + ""); //See if the list is incrementing
+                            break; //Increase line number, store line, clean line array, next line
                     default: Console.Write(c.KeyChar); ch[pointer] = c.KeyChar; pointer++; break;
                 }
             }
@@ -95,22 +95,32 @@ namespace LiquiDOS
             }
         }
 
+        private string arrayToText()
+        {
+            string text = ""; Kernel.PrintDebug("Line length: " + line.Length);
+            for (int i = 0; i < line.Length; i++)
+            {
+                Kernel.PrintDebug(" LineConcat: " + line[i]);
+                text = string.Concat(text, line[i]); //<<ALL ARROWS POINT HERE, THIS LITTLE FELLA'
+                Kernel.PrintDebug(" LineConcatLine: " + text + "," + i);
+            }
+            Kernel.PrintDebug(" LineConcatText: " + text);
+            return text;
+        }
+
         private void listCheck()
         {
             foreach (var s in lines)
-                Kernel.PrintDebug(s); //Works!
+                Kernel.PrintDebug(" List: " + s); //Works!
         }
 
         private string[] arrayCheck(string[] s)
         {
-            string lined = "";
             foreach (var ss in s)
             {
-                Kernel.PrintDebug(ss); //Works!
+                Kernel.PrintDebug(" Line: " + ss); //Works!
             }
-            string.Join(lined, s); //<-broken
-            Kernel.PrintDebug(lined);
-            return s;
+            return s; //Just return the input...
         }
 
         public void displayHelp(string input)

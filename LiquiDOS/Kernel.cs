@@ -85,32 +85,37 @@ namespace LiquiDOS
             //Have multiple help pages the screen doesn't overflow :)
             string i = "";
             if (input.Split(' ').Length >= 2)
-               i = input.Split(' ')[1];
+                i = input.Split(' ')[1];
             switch (i)
             {
                 case "0":
-                    Console.WriteLine("help:   Shows this list again. Usage help [pg#]");
-                    Console.WriteLine("ls:     Shows list of files and directories.");
-                    Console.WriteLine("fs:     Lists all the drives.");
-                    Console.WriteLine("rm:     Removes the file. Usage: rm [path]");
-                    Console.WriteLine("rmdir   Removes the directory. Usage: rmdir [path]");
-                    Console.WriteLine("cd:     Change the current directory. Usage: cd [path]");
-                    Console.WriteLine("mkdir:  Makes a directory. Usage: mkdir [patn]");
-                    Console.WriteLine("open:   Opens and displays contents of a file. Usage: open [path]");
-                    Console.WriteLine("nano:   Opens and edit the contents of a file. Usage: nano [path]");
-                    Console.WriteLine("reboot: Reboots the computer.");
-                    Console.WriteLine("clear:  Clear the screen.");
-                    Console.WriteLine("echo:   Echoes an input. Usage: echo [text to echo]");
-                    Console.WriteLine("utime:  Returns unix style time.");
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.WriteLine("For more commands, type help [page number]");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    helpText1();
                     break;
                 case "1":
                     break;
-                default: break;
+                default: helpText1(); break;
             }
 
+        }
+
+        private void helpText1()
+        {
+            Console.WriteLine("help:   Shows this list again. Usage help [pg#]");
+            Console.WriteLine("ls:     Shows list of files and directories.");
+            Console.WriteLine("fs:     Lists all the drives.");
+            Console.WriteLine("rm:     Removes the file. Usage: rm [path]");
+            Console.WriteLine("rmdir   Removes the directory. Usage: rmdir [path]");
+            Console.WriteLine("cd:     Change the current directory. Usage: cd [path]");
+            Console.WriteLine("mkdir:  Makes a directory. Usage: mkdir [patn]");
+            Console.WriteLine("open:   Opens and displays contents of a file. Usage: open [path]");
+            Console.WriteLine("nano:   Opens and edit the contents of a file. Usage: nano [path]");
+            Console.WriteLine("reboot: Reboots the computer.");
+            Console.WriteLine("clear:  Clear the screen.");
+            Console.WriteLine("echo:   Echoes an input. Usage: echo [text to echo]");
+            Console.WriteLine("utime:  Returns unix style time.");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("For more commands, type help [page number]");
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         #endregion
@@ -213,15 +218,9 @@ namespace LiquiDOS
                 try
                 {
                     if (File.Exists(cd + path))
-                    {
-                        foreach (string s in File.ReadAllLines(cd + path))
-                            Console.WriteLine(s);
-                    }
+                        Console.WriteLine(File.ReadAllText(cd + path));
                     else if (File.Exists(path))
-                    {
-                        foreach (string s in File.ReadAllLines(path))
-                            Console.WriteLine(s);
-                    }
+                        Console.WriteLine(File.ReadAllText(path));
                     else
                         Console.WriteLine("File does not exist: " + cd + path);
                 }
