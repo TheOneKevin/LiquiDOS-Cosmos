@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiquiDOS.Core
+namespace LiquiDOS.HAL
 {
     public class CPU
     {
-        public uint getRam() { return Cosmos.Core.CPU.GetAmountOfRAM(); }
+        public static uint getRam() { return Cosmos.Core.CPU.GetAmountOfRAM(); }
     }
 }

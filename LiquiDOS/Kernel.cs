@@ -13,6 +13,7 @@ namespace LiquiDOS
         #region Variables
 
         Sys.FileSystem.CosmosVFS fs;
+        Sound s;
         public static string cd = @"0:\";
         private List<string> commandHistory = new List<string>();
         static string s1 = "               Copyright (c) 2016 Kevin Dai All Rights Reserved.";
@@ -30,6 +31,9 @@ namespace LiquiDOS
             fs = new Sys.FileSystem.CosmosVFS();
             VFSManager.RegisterVFS(fs);
             fs.Initialize();
+
+            s = new Sound();
+
             //Display welcome message
             Cosmos.System.Kernel.PrintDebug("Kernel loaded sucessfully!");
             Console.WriteLine("Loading complete...");
@@ -60,7 +64,8 @@ namespace LiquiDOS
                     case "ls": dir(); break;
                     case "fs": listDrives(); break;
                     case "clear": clear(); break;
-                    case "reboot": reboot(); break;
+                    case "reboot": reboot(input); break;
+                    case "shutdown": shutdown(input); break;
                     case "dev": dev(); break;
                     case "open": openFile(input); break;
                     case "echo": echo(input); break;
@@ -70,7 +75,8 @@ namespace LiquiDOS
                     case "rm": rm(input); break;
                     case "rmdir": rmdir(input); break;
                     case "nano": nano(input); break;
-
+                    case "getram": getRam(); break;
+                    
                     default: error(input); break;
                 }
             }
@@ -88,34 +94,43 @@ namespace LiquiDOS
                 i = input.Split(' ')[1];
             switch (i)
             {
-                case "0":
-                    helpText1();
-                    break;
-                case "1":
-                    break;
-                default: helpText1(); break;
+                case "0": helpText(0); break;
+                case "1": helpText(1); break;
+                default: helpText(0); break;
             }
 
         }
 
-        private void helpText1()
+        private void helpText(int i)
         {
-            Console.WriteLine("help:   Shows this list again. Usage help [pg#]");
-            Console.WriteLine("ls:     Shows list of files and directories.");
-            Console.WriteLine("fs:     Lists all the drives.");
-            Console.WriteLine("rm:     Removes the file. Usage: rm [path]");
-            Console.WriteLine("rmdir   Removes the directory. Usage: rmdir [path]");
-            Console.WriteLine("cd:     Change the current directory. Usage: cd [path]");
-            Console.WriteLine("mkdir:  Makes a directory. Usage: mkdir [patn]");
-            Console.WriteLine("open:   Opens and displays contents of a file. Usage: open [path]");
-            Console.WriteLine("nano:   Opens and edit the contents of a file. Usage: nano [path]");
-            Console.WriteLine("reboot: Reboots the computer.");
-            Console.WriteLine("clear:  Clear the screen.");
-            Console.WriteLine("echo:   Echoes an input. Usage: echo [text to echo]");
-            Console.WriteLine("utime:  Returns unix style time.");
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("For more commands, type help [page number]");
-            Console.ForegroundColor = ConsoleColor.White;
+            switch (i)
+            {
+                case 0:
+                    Console.WriteLine("help:   Shows this list again. Usage help [pg#]");
+                    Console.WriteLine("ls:     Shows list of files and directories.");
+                    Console.WriteLine("fs:     Lists all the drives.");
+                    Console.WriteLine("rm:     Removes the file. Usage: rm [path]");
+                    Console.WriteLine("rmdir   Removes the directory. Usage: rmdir [path]");
+                    Console.WriteLine("cd:     Change the current directory. Usage: cd [path]");
+                    Console.WriteLine("mkdir:  Makes a directory. Usage: mkdir [patn]");
+                    Console.WriteLine("open:   Opens and displays contents of a file. Usage: open [path]");
+                    Console.WriteLine("nano:   Opens and edit the contents of a file. Usage: nano [path]");
+                    Console.WriteLine("reboot: Reboots the computer. Usage: reboot [delay ms]");
+                    Console.WriteLine("shutdown: Shutdowns the PC. Usage: shutdown [delay ms]");
+                    Console.WriteLine("clear:  Clear the screen.");
+                    Console.WriteLine("echo:   Echoes an input. Usage: echo [text to echo]");
+                    Console.WriteLine("utime:  Returns unix style time.");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("For more commands, type help [page number]");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                case 1:
+                    Console.WriteLine("getram: Returns the amount of ram available.");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("For more commands, type help [page number]");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+            }
         }
 
         #endregion
@@ -282,6 +297,44 @@ namespace LiquiDOS
 
         #endregion
 
+        #region Power
+
+        private void shutdown(string input)
+        {
+            try
+            {
+                uint i = 0;
+                if (input.Split(' ').Length >= 2)
+                    uint.TryParse(input.Split(' ')[1], out i);
+                else
+                    i = 0;
+                Console.Clear();
+                Console.WriteLine("Halting PC...");
+                PIT pit = new PIT(); pit.waitMS(i);
+                Power.shutdown();
+            }
+            catch (Exception e) { Console.WriteLine(e.Message); }
+        }
+
+        private void reboot(string input)
+        {
+            try
+            {
+                uint i = 0;
+                if (input.Split(' ').Length >= 2)
+                    uint.TryParse(input.Split(' ')[1], out i);
+                else
+                    i = 0;
+                Console.Clear();
+                Console.WriteLine("Rebooting PC...");
+                PIT pit = new PIT(); pit.waitMS(i);
+                Sys.Power.Reboot();
+            }
+            catch (Exception e) { Console.WriteLine(e.Message); }
+        }
+
+        #endregion
+
         #region Misc
 
         private void error(string input)
@@ -312,7 +365,7 @@ namespace LiquiDOS
             {
                 try
                 {
-                    FileManager fm = new FileManager();
+                    Nano fm = new Nano();
                     if (File.Exists(cd + path))
                         fm.initNano(cd + path);
                     else if (File.Exists(path))
@@ -330,10 +383,10 @@ namespace LiquiDOS
             }
         }
 
-        private void reboot(){ Sys.Power.Reboot(); }
         private void echo(string input) { Console.WriteLine(input.Trim().Substring(input.Trim().Split(' ')[0].Length)); }
         private void time() { Console.WriteLine("Time is: " + Time.Hour() + ":" + Time.Minute() + ":" + Time.Second()); }
         private void date() { Console.WriteLine("Date is (M/D/Y): " + Time.Month() + "/" + Time.DayOfMonth() + "/" + Time.Century() + Time.Year() + " Day: " + Time.DayOfWeek()); }
+        private void getRam() { Console.WriteLine("Amount of RAM installed: " + Drivers.Power.getRam() + " bytes"); }
 
         #endregion
     }

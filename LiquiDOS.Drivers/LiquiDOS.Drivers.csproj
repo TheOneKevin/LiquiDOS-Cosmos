@@ -46,10 +46,19 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="KeyboardDriver.cs" />
+    <Compile Include="PIT.cs" />
+    <Compile Include="Power.cs" />
+    <Compile Include="Sound.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="VbeDriver.cs" />
     <Compile Include="VGADriver.cs" />
     <Compile Include="MouseDriver.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LiquiDOS.HAL\LiquiDOS.HAL.csproj">
+      <Project>{08884510-9c43-4584-8410-e9c0bbb6d20c}</Project>
+      <Name>LiquiDOS.HAL</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
