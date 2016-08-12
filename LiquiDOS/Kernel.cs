@@ -13,13 +13,16 @@ namespace LiquiDOS
         #region Variables
 
         Sys.FileSystem.CosmosVFS fs;
-        Sound s;
+        //Declare all the drivers (load 'em like linux)
+        bool isConsole = true; bool firstTImeUser = true;
+        MouseDriver m; VBE v; int usergroup = 1; bool isLoggedIn = false;
+
         public static string cd = @"0:\";
         private List<string> commandHistory = new List<string>();
-        static string s1 = "               Copyright (c) 2016 Kevin Dai All Rights Reserved.";
-        static string s2 = "         Currently under development. Not responsible for any damages.";
-        static string s3 = "                           Proceed at your own risk.";
-        static string s4 = "          Welcome to LquiDOS.Type help [pg #] for a list of commands.";
+        static string s1 = "                  LiquiDOS created by Kevin Dai, using COSMOS";
+        static string s2 = "          Currently under development. Not responsible for any damages";
+        static string s3 = "                            Proceed at your own risk";
+        static string s4 = "            Welcome to LquiDOS.Type help [pg #] for a list of commands";
 
         #endregion
 
@@ -31,9 +34,7 @@ namespace LiquiDOS
             fs = new Sys.FileSystem.CosmosVFS();
             VFSManager.RegisterVFS(fs);
             fs.Initialize();
-
-            s = new Sound();
-
+            //Power.enableACPI();
             //Display welcome message
             Cosmos.System.Kernel.PrintDebug("Kernel loaded sucessfully!");
             Console.WriteLine("Loading complete...");
@@ -45,9 +46,54 @@ namespace LiquiDOS
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(s4);
             Console.ForegroundColor = ConsoleColor.White;
+            firstTImeUser = firstTimeUser();
         }
 
         protected override void Run()
+        {
+            if (firstTImeUser)
+            {
+                if (isLoggedIn)
+                {
+                    if (isConsole)
+                        consoleLoop();
+                    else
+                        initGUI();
+                }
+                else
+                    displayLogin();
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("LiquiDOS is getting your OS set up, hang on!");
+                Console.WriteLine("Created users.dat! Press any key to reboot...");
+                Console.ReadKey();
+                reboot("");
+            }
+        }
+
+        private bool firstTimeUser()
+        {
+            if (File.Exists(@"0:\user.dat")) //Files inside directory not supported
+                return true;
+            else
+            {
+                try
+                {
+                    fs.CreateFile(@"0:\user.dat");
+                    File.WriteAllText(@"0:\user.dat", "$user:root$pswd:#NAL#$date:#NAL#$group:01$name:root");
+                }
+                catch (Exception e) { Console.WriteLine(e.ToString()); }
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Console
+
+        private void consoleLoop()
         {
             //Init the console. Get the current dir (cd)
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -76,13 +122,16 @@ namespace LiquiDOS
                     case "rmdir": rmdir(input); break;
                     case "nano": nano(input); break;
                     case "getram": getRam(); break;
+                    case "startx": Console.WriteLine("GUI is currently under development, are you sure you want to continue? (y/n):");
+                        if (Console.ReadKey().Key == ConsoleKey.Y)
+                            isConsole = false;
+                        break; //Init the GUI
                     
                     default: error(input); break;
                 }
             }
-            catch(Exception e) { Console.WriteLine(e.Message); }
+            catch (Exception e) { Console.WriteLine(e.Message); }
         }
-
         private void help(string input)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -126,6 +175,8 @@ namespace LiquiDOS
                     break;
                 case 1:
                     Console.WriteLine("getram: Returns the amount of ram available.");
+                    Console.WriteLine("startx: Starts the GUI X server.");
+                    Console.WriteLine("chmod: Executes a batch file. Usage chmod [path]");
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.WriteLine("For more commands, type help [page number]");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -137,9 +188,21 @@ namespace LiquiDOS
 
         #region File Operations
 
-        private void mkfile(string input)
+        private void mkfile(string path)
         {
+            try
+            {
 
+                if (VFSManager.FileExists(cd + path))
+                    VFSManager.CreateFile(cd + path);
+                if (VFSManager.FileExists(cd + "\\" + path))
+                    VFSManager.CreateFile(cd + "\\" + path);
+                else if (VFSManager.FileExists(path))
+                    VFSManager.CreateFile(path);
+                else
+                    Console.WriteLine("File does not exist " + path);
+            }
+            catch (Exception e) { Console.WriteLine(e.Message); }
         }
 
         private void rmdir(string input)
@@ -200,7 +263,7 @@ namespace LiquiDOS
                     else
                         Console.WriteLine("File/Directory already exists " + cd + path);
                 }
-                catch(Exception e) { 
+                catch (Exception e) {
                     Console.WriteLine(e.Message);
                 }
             }
@@ -310,7 +373,7 @@ namespace LiquiDOS
                     i = 0;
                 Console.Clear();
                 Console.WriteLine("Halting PC...");
-                PIT pit = new PIT(); pit.waitMS(i);
+                //PIT pit = new PIT(); pit.waitMS(i);
                 Power.shutdown();
             }
             catch (Exception e) { Console.WriteLine(e.Message); }
@@ -327,7 +390,7 @@ namespace LiquiDOS
                     i = 0;
                 Console.Clear();
                 Console.WriteLine("Rebooting PC...");
-                PIT pit = new PIT(); pit.waitMS(i);
+                //PIT pit = new PIT(); pit.waitMS(i);
                 Sys.Power.Reboot();
             }
             catch (Exception e) { Console.WriteLine(e.Message); }
@@ -372,7 +435,7 @@ namespace LiquiDOS
                         fm.initNano(path);
                     else
                     {
-                        fs.CreateFile(cd + path);
+                        mkfile(cd + path);
                         fm.initNano(cd + path);
                     }
                 }
@@ -387,6 +450,39 @@ namespace LiquiDOS
         private void time() { Console.WriteLine("Time is: " + Time.Hour() + ":" + Time.Minute() + ":" + Time.Second()); }
         private void date() { Console.WriteLine("Date is (M/D/Y): " + Time.Month() + "/" + Time.DayOfMonth() + "/" + Time.Century() + Time.Year() + " Day: " + Time.DayOfWeek()); }
         private void getRam() { Console.WriteLine("Amount of RAM installed: " + Drivers.Power.getRam() + " bytes"); }
+
+        #endregion
+
+        #region GUI
+
+        private void initGUI()
+        {
+            int lastX = 0, lastY = 0;
+            v = new VBE();
+            v.init(); m = new MouseDriver(); m.init(v.vbeScreen.ScreenWidth, v.vbeScreen.ScreenHeight);
+            v.DrawRect(0, v.vbeScreen.ScreenHeight - 50, v.vbeScreen.ScreenWidth, 50, 0x9A3BFF);
+            while (true)
+            {
+                v.SetPixel(lastX, lastY, v.ClearColor);
+                lastX = m.getX(); lastY = m.getY();
+                v.SetPixel(m.getX(), m.getY(), 0x000000);
+            }
+        }
+
+        #endregion
+
+        #region Login
+
+        public void displayLogin()
+        {
+            Console.Write("Enter your username: ");
+            string s = Console.ReadLine();
+            Console.Write("Enter your password: ");
+            string p = Console.ReadLine();
+            string[] logins = File.ReadAllLines(@"0:\user.dat");
+            if (Login.validateLogin(0, logins[0], p, s))
+                isLoggedIn = true;
+        }
 
         #endregion
     }

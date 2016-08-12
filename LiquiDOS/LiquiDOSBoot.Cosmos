@@ -11,8 +11,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Profile>VMware</Profile>
-    <DebugEnabled>true</DebugEnabled>
+    <Profile>ISO</Profile>
+    <DebugEnabled>False</DebugEnabled>
     <DebugMode>Source</DebugMode>
     <TraceMode>User</TraceMode>
     <EnableGDB>False</EnableGDB>
@@ -20,9 +20,9 @@
     <VMWareEdition>Player</VMWareEdition>
     <OutputPath>bin\Debug\</OutputPath>
     <Name>LiquiDOSBoot</Name>
-    <Description>Use VMware Player or Workstation to deploy and debug.</Description>
+    <Description>Creates a bootable ISO image which can be burned to a DVD. After running the selected project, an explorer window will open containing the ISO file. The ISO file can then be burned to a CD or DVD and used to boot a physical or virtual system.</Description>
     <Deployment>ISO</Deployment>
-    <Launch>VMware</Launch>
+    <Launch>None</Launch>
     <VisualStudioDebugPort>Pipe: Cosmos\Serial</VisualStudioDebugPort>
     <PxeInterface>192.168.56.1</PxeInterface>
     <VMware_Name>LiquiDOSBoot</VMware_Name>
@@ -49,6 +49,22 @@
     <ISO_OutputPath>bin\Debug\</ISO_OutputPath>
     <ISO_EnableGDB>False</ISO_EnableGDB>
     <ISO_StartCosmosGDB>false</ISO_StartCosmosGDB>
+    <StackCorruptionDetectionEnabled>True</StackCorruptionDetectionEnabled>
+    <ISO_StackCorruptionDetectionEnabled>True</ISO_StackCorruptionDetectionEnabled>
+    <VMware_StackCorruptionDetectionEnabled>True</VMware_StackCorruptionDetectionEnabled>
+    <Bochs_StackCorruptionDetectionEnabled>True</Bochs_StackCorruptionDetectionEnabled>
+    <Bochs_Name>LiquiDOSBoot</Bochs_Name>
+    <Bochs_Description>Use Bochs emulator to deploy and debug.</Bochs_Description>
+    <Bochs_Deployment>ISO</Bochs_Deployment>
+    <Bochs_Launch>Bochs</Bochs_Launch>
+    <Bochs_DebugEnabled>true</Bochs_DebugEnabled>
+    <Bochs_DebugMode>Source</Bochs_DebugMode>
+    <Bochs_VisualStudioDebugPort>Pipe: Cosmos\Serial</Bochs_VisualStudioDebugPort>
+    <Bochs_PxeInterface>192.168.56.1</Bochs_PxeInterface>
+    <Bochs_VMwareEdition>Player</Bochs_VMwareEdition>
+    <Bochs_OutputPath>bin\Debug\</Bochs_OutputPath>
+    <Bochs_EnableGDB>False</Bochs_EnableGDB>
+    <Bochs_StartCosmosGDB>false</Bochs_StartCosmosGDB>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=".\LiquiDOS.csproj">

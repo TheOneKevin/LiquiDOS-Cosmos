@@ -29,12 +29,13 @@ namespace LiquiDOS
                 {
                     if (c.Key == ConsoleKey.X)
                     {
-                        lines.Add(new string(line)); //Add any unadded lines
+                        lines.Add(new string(line).Trim()); //Add any unadded lines
                         listCheck(); final = lines.ToArray(); //Store vars
 						string foo = concatString(final); //Get the final text
                         Kernel.PrintDebug(concatString(arrayCheck(final)));
 						Console.WriteLine("Here comes the concated text: \n" + foo);
 						File.WriteAllText(path, foo); //Write to file
+                        Console.ReadKey();
                         break;
                     }
                     /*else if(c.Key == ConsoleKey.End)
@@ -47,18 +48,25 @@ namespace LiquiDOS
                 {
                     case ConsoleKey.UpArrow: break;
                     case ConsoleKey.DownArrow: break;
-                    case ConsoleKey.LeftArrow: break;
-                    case ConsoleKey.RightArrow: break;
+                    case ConsoleKey.LeftArrow: if (pointer > 0) { pointer--; Console.CursorLeft--; } break;
+                    case ConsoleKey.RightArrow: if (pointer < 80) { pointer++; Console.CursorLeft++; if (line[pointer] == 0) line[pointer] = ' '; } break;
                     case ConsoleKey.Backspace: deleteChar(); break;
                     case ConsoleKey.Delete: deleteChar(); break;
                     case ConsoleKey.Enter:
-                        Console.Write(Environment.NewLine); pointer = 0;
-                        lines.Add(new string(line).TrimEnd()); cleanArray(line); Console.CursorLeft = 0;
+                        /*char[] split = doTheTing(); //We split the string at the cursor pos
+                        //Store the first half into the list, store the second half into char
+                        Console.Write("\n");
+                        cleanArray(line); appendIntoChar(split); pointer = split.Length;
+                        Console.CursorLeft = 0;
+                        Console.CursorTop--; Console.Write(new string(doTheThing()).TrimEnd());
+                        Console.CursorTop++; Console.Write(new string(split).TrimEnd());
+                        Console.CursorLeft = pointer;*/
+                        lines.Add(new string(line).Trim()); cleanArray(line); Console.CursorLeft = 0; Console.CursorTop++;
                         break;
                     default: line[pointer] = ch; pointer++; Console.Write(ch); break;
                 }
-                listCheck();
             }
+            Kernel.clear();
         }
 
         private string concatString(string[] s)
@@ -134,6 +142,52 @@ namespace LiquiDOS
             Console.WriteLine("cannot edit a line above. You can only edit the current line.");
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey(); initNano(input);
+        }
+
+        //What does this do again? I kinda forgot. Wrote this when I was in a trance :p
+        public char[] doTheTing() //Ting?! Srsly?!
+        {
+            char[] foo = new char[pointer];
+            char[] foobar = new char[80 - pointer];
+            for (int i = 0; i < pointer; i++)
+                foo[i] = line[i];
+            for (int i = 0; i < 80 - pointer; i++)
+            {
+                foobar[i] = line[pointer + i];
+            }
+            
+            lines.Add(new string(foo).TrimEnd());
+            return foobar;
+        }
+
+        //What does this do again?
+        public char[] doTheThing()
+        {
+            char[] foo = new char[pointer];
+            char[] foobar = new char[80 - pointer];
+            for (int i = 0; i < pointer; i++)
+                foo[i] = line[i];
+            for (int i = 0; i < 80 - pointer; i++)
+                foobar[i] = line[pointer + i];
+            return foo;
+        }
+
+        private void appendIntoChar(char[] arrayToAppend)
+        {
+            for (int i = 0; i < arrayToAppend.Length; i++)
+                line[i] = arrayToAppend[i];
+        }
+
+        public void getCharUpDown(bool isDown)
+        {
+            if(isDown)
+            {
+
+            }
+            else
+            {
+
+            }
         }
     }
 }
