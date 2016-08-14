@@ -15,10 +15,11 @@ namespace LiquiDOS
         Sys.FileSystem.CosmosVFS fs;
         //Declare all the drivers (load 'em like linux)
         bool isConsole = true; bool firstTImeUser = true;
-        MouseDriver m; VBE v; int usergroup = 1; bool isLoggedIn = false;
+        MouseDriver m; VBE v;
+        int usergroup = 1; bool isLoggedIn = false; string user = "", ps = ""; //IDK if storing pswd in ram is ok?
 
         public static string cd = @"0:\";
-        private List<string> commandHistory = new List<string>();
+        //private List<string> commandHistory = new List<string>();
         static string s1 = "                  LiquiDOS created by Kevin Dai, using COSMOS";
         static string s2 = "          Currently under development. Not responsible for any damages";
         static string s3 = "                            Proceed at your own risk";
@@ -51,7 +52,7 @@ namespace LiquiDOS
 
         protected override void Run()
         {
-            if (firstTImeUser)
+            if (!firstTImeUser) //If we aren't a first time user
             {
                 if (isLoggedIn)
                 {
@@ -63,7 +64,7 @@ namespace LiquiDOS
                 else
                     displayLogin();
             }
-            else
+            else //Else init the install procedure
             {
                 Console.Clear();
                 Console.WriteLine("LiquiDOS is getting your OS set up, hang on!");
@@ -75,17 +76,17 @@ namespace LiquiDOS
 
         private bool firstTimeUser()
         {
-            if (File.Exists(@"0:\user.dat")) //Files inside directory not supported
-                return true;
+            if (File.Exists("0:\\users.dat")) //Files inside directory not supported
+                return false;
             else
             {
                 try
                 {
-                    fs.CreateFile(@"0:\user.dat");
-                    File.WriteAllText(@"0:\user.dat", "$user:root$pswd:#NAL#$date:#NAL#$group:01$name:root");
+                    fs.CreateFile("0:\\users.dat");
+                    File.WriteAllText("0:\\users.dat", "$user:root$pswd:root$date:#NAL#$group:01$name:root");
                 }
                 catch (Exception e) { Console.WriteLine(e.ToString()); }
-                return false;
+                return true;
             }
         }
 
@@ -101,7 +102,7 @@ namespace LiquiDOS
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("> "); Console.ForegroundColor = ConsoleColor.White;
             var input = Console.ReadLine();
-            commandHistory.Add(input);
+            //commandHistory.Add(input);
             try
             {
                 switch (input.Trim().Split(' ')[0])
@@ -126,6 +127,12 @@ namespace LiquiDOS
                         if (Console.ReadKey().Key == ConsoleKey.Y)
                             isConsole = false;
                         break; //Init the GUI
+                    case "mkfile":
+                        string path = input.Trim().Substring(6).Trim(); //mkfile <- 6 chars
+                        if (path.Length >= 2)
+                            mkfile(path);
+                        break;
+                    case "math": break;
                     
                     default: error(input); break;
                 }
@@ -177,6 +184,7 @@ namespace LiquiDOS
                     Console.WriteLine("getram: Returns the amount of ram available.");
                     Console.WriteLine("startx: Starts the GUI X server.");
                     Console.WriteLine("chmod: Executes a batch file. Usage chmod [path]");
+                    Console.WriteLine("mkfile: Creates a file. Usage mkfile [path]");
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.WriteLine("For more commands, type help [page number]");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -192,15 +200,12 @@ namespace LiquiDOS
         {
             try
             {
-
-                if (VFSManager.FileExists(cd + path))
+                if (!File.Exists(cd + path))
                     VFSManager.CreateFile(cd + path);
-                if (VFSManager.FileExists(cd + "\\" + path))
-                    VFSManager.CreateFile(cd + "\\" + path);
-                else if (VFSManager.FileExists(path))
+                else if (!File.Exists(path))
                     VFSManager.CreateFile(path);
                 else
-                    Console.WriteLine("File does not exist " + path);
+                    Console.WriteLine("File already exists " + path);
             }
             catch (Exception e) { Console.WriteLine(e.Message); }
         }
@@ -475,13 +480,47 @@ namespace LiquiDOS
 
         public void displayLogin()
         {
+            Login l = new Login();
             Console.Write("Enter your username: ");
             string s = Console.ReadLine();
             Console.Write("Enter your password: ");
-            string p = Console.ReadLine();
+            string p = maskedEntry();
             string[] logins = File.ReadAllLines(@"0:\user.dat");
-            if (Login.validateLogin(0, logins[0], p, s))
+            Kernel.PrintDebug(logins[0] + logins.Length);
+            if (l.validateLogin(0, logins[0], p, s))
+            {
                 isLoggedIn = true;
+                usergroup = l.group; user = s; ps = p;
+                Kernel.PrintDebug("We're in!");
+            }
+        }
+
+        private string maskedEntry()
+        {
+            //Love the linux way of masking passwords
+            string pass = "";
+            ConsoleKeyInfo key;
+            do
+            {
+                key = Console.ReadKey(true);
+                if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+                {
+                    pass += key.KeyChar;
+                    //Console.Write("*");
+                }
+                else
+                {
+                    if (key.Key == ConsoleKey.Backspace && pass.Length > 0)
+                    {
+                        pass = pass.Substring(0, (pass.Length - 1));
+                        //Console.Write("\b \b");
+                    }
+                }
+            }
+            // Stops Receving Keys Once Enter is Pressed
+            while (key.Key != ConsoleKey.Enter);
+            Console.WriteLine();
+            return pass;
         }
 
         #endregion

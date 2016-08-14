@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace LiquiDOS
 {
-    public static class Login
+    public class Login
     {
-        private static string password = "", user = "", name = ""; public static int group = 0;
-        private static byte[] GetHash(string inputString)
+        private string password = "", user = "", name = ""; public int group = 0;
+        private byte[] GetHash(string inputString)
         {
             byte[] result;
             var shaM = new SHA1Managed();
@@ -28,29 +28,33 @@ namespace LiquiDOS
             return sb.ToString();
         }*/
 
-        public static bool validateLogin(int tries, string login, string input, string usern)
+        public bool validateLogin(int tries, string login, string input, string usern)
         {
             //$user:[name]$pswd:#NAL#$date:#NAL#$group:[number]$name:[string]
             string[] lines = login.Split('$');
             foreach(string entry in lines)
                 parseToken(entry);
-            if (password == "#NAL#" && string.IsNullOrWhiteSpace(input))
+            if (input == password && usern == user)
+            {
+                Kernel.PrintDebug("We are in 1!");
                 return true;
-            else if (GetHash(input) == GetHash(password) && usern == user)
-                return true;
+            }
             else
+            {
+                Kernel.PrintDebug("We are in hot water!");
                 return false;
+            }
         }
 
-        private static void parseToken(string entry)
+        private void parseToken(string entry)
         {
             string[] token = entry.Split(':');
             if (token.Length >= 2)
             {
                 switch (token[0])
                 {
-                    case "user": user = token[1]; break;
-                    case "pswd": if (token[1] == "#NAL#") password = ""; else password = token[1];  break;
+                    case "user": user = token[1]; Kernel.PrintDebug("User:" + token[1]); break;
+                    case "pswd": if (token[1] == "#NAL#") password = ""; else password = token[1]; Kernel.PrintDebug("Pass:" + token[1]); break;
                     case "date": break;
                     case "group": group = getGroup(token[1]);  break;
                     case "name": name = token[1]; break;
@@ -59,7 +63,7 @@ namespace LiquiDOS
             }
         }
 
-        private static int getGroup(string group)
+        private int getGroup(string group)
         {
             switch(group)
             {

@@ -65,6 +65,19 @@
     <Bochs_OutputPath>bin\Debug\</Bochs_OutputPath>
     <Bochs_EnableGDB>False</Bochs_EnableGDB>
     <Bochs_StartCosmosGDB>false</Bochs_StartCosmosGDB>
+    <IntelEdison_StackCorruptionDetectionEnabled>True</IntelEdison_StackCorruptionDetectionEnabled>
+    <IntelEdison_Name>LiquiDOSBoot</IntelEdison_Name>
+    <IntelEdison_Description>Connect to Intel Edison device to deploy and debug.</IntelEdison_Description>
+    <IntelEdison_Deployment>BinaryImage</IntelEdison_Deployment>
+    <IntelEdison_Launch>IntelEdison</IntelEdison_Launch>
+    <IntelEdison_DebugEnabled>true</IntelEdison_DebugEnabled>
+    <IntelEdison_DebugMode>Source</IntelEdison_DebugMode>
+    <IntelEdison_VisualStudioDebugPort>Pipe: Cosmos\Serial</IntelEdison_VisualStudioDebugPort>
+    <IntelEdison_PxeInterface>192.168.56.1</IntelEdison_PxeInterface>
+    <IntelEdison_VMwareEdition>Player</IntelEdison_VMwareEdition>
+    <IntelEdison_OutputPath>bin\Debug\</IntelEdison_OutputPath>
+    <IntelEdison_EnableGDB>False</IntelEdison_EnableGDB>
+    <IntelEdison_StartCosmosGDB>false</IntelEdison_StartCosmosGDB>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=".\LiquiDOS.csproj">
