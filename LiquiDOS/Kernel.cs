@@ -101,7 +101,7 @@ namespace LiquiDOS
             Console.Write(cd); Console.ForegroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("> "); Console.ForegroundColor = ConsoleColor.White;
-            var input = Console.ReadLine();
+            string input = Console.ReadLine();
             //commandHistory.Add(input);
             try
             {
@@ -133,6 +133,7 @@ namespace LiquiDOS
                             mkfile(path);
                         break;
                     case "math": break;
+                    case "user": createUser(input); break;
                     
                     default: error(input); break;
                 }
@@ -185,6 +186,8 @@ namespace LiquiDOS
                     Console.WriteLine("startx: Starts the GUI X server.");
                     Console.WriteLine("chmod: Executes a batch file. Usage chmod [path]");
                     Console.WriteLine("mkfile: Creates a file. Usage mkfile [path]");
+                    Console.WriteLine("math: Computes the input. Type math -h for help on this command.");
+                    Console.WriteLine("user: User operations. Type user -h for help on this command.");
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.WriteLine("For more commands, type help [page number]");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -480,12 +483,13 @@ namespace LiquiDOS
 
         public void displayLogin()
         {
+            string[] logins = File.ReadAllLines(@"0:\users.dat");
             Login l = new Login();
+            l.list(logins);
             Console.Write("Enter your username: ");
             string s = Console.ReadLine();
             Console.Write("Enter your password: ");
             string p = maskedEntry();
-            string[] logins = File.ReadAllLines(@"0:\user.dat");
             Kernel.PrintDebug(logins[0] + logins.Length);
             if (l.validateLogin(0, logins[0], p, s))
             {
@@ -522,6 +526,55 @@ namespace LiquiDOS
             Console.WriteLine();
             return pass;
         }
+
+        public void createUser(string input)
+        {
+            string[] args = input.Trim().Substring(4).Split(' ');
+            int flag = 0; string u = "", p = "", d = "";
+            if(args.Length >= 1)
+            {
+                foreach(string s in args)
+                {
+                    switch(s.Trim())
+                    {
+                        case "-h": flag = 1; break;
+                        case "-u": flag = 2; break;
+                        case "-p": flag = 3; break;
+                        case "-d": flag = 4; break;
+                        case "-g": flag = 5; break;
+                        default: flag = 0; break;
+                    }
+                    if(flag != 0)
+                    {
+                        if (flag == 1)
+                        {
+                            Console.WriteLine("user -h: Displays this help message.");
+                            Console.WriteLine("user -u [name]: Sets the username of the account.");
+                            Console.WriteLine("user -p [name]: Sets the password of the account.");
+                            Console.WriteLine("user -d [name]: Sets the display name of the account.");
+                            Console.WriteLine("You must set the username value of the account!");
+                        }
+                        else if (flag == 2)
+                            u = s.Trim();
+                        else if (flag == 3)
+                            p = s.Trim();
+                        else if (flag == 4)
+                            d = s.Trim();
+                        else
+                            flag = 0;
+
+                    }
+                }
+                if(string.IsNullOrWhiteSpace(u))
+                {
+                    Login l = new Login();
+                    string[] logins = File.ReadAllLines(@"0:\users.dat");
+                    l.createUser(logins, u, p, 0, d);
+                }
+                else
+                    Console.WriteLine("You must specify a username!");
+            }
+        } //End void
 
         #endregion
     }

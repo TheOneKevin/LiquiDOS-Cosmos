@@ -1,6 +1,7 @@
 ﻿using Cosmos.Common.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -28,6 +29,29 @@ namespace LiquiDOS
             return sb.ToString();
         }*/
 
+        public void createUser(string[] logins, string usern, string passw, int group, string userd)
+        {
+            string date = Drivers.Time.Month() + Drivers.Time.DayOfMonth() + Drivers.Time.Century() + Drivers.Time.Year() + "";
+            string time = Drivers.Time.Hour() + Drivers.Time.Minute() + Drivers.Time.Second() + "";
+            //$user:[name]$pswd:#NAL#$date:#NAL#$group:[number]$name:[string]
+            string t = "";
+            foreach(string s in logins)
+            {
+                t = string.Concat(t, Environment.NewLine, "$user:" + user + "$pswd:" + passw + "$group:" + group + "$name:" + userd);
+            }
+            File.WriteAllText(@"0:\users.dat", t);
+        }
+        
+        public void list(string[] logins)
+        {
+            Console.WriteLine("Users on the computer:");
+            foreach(string l in logins)
+            {
+                parseToken(l);
+                Console.WriteLine("Username: " + user + ", Display Name: " + name);
+            }
+        }
+        
         public bool validateLogin(int tries, string login, string input, string usern)
         {
             //$user:[name]$pswd:#NAL#$date:#NAL#$group:[number]$name:[string]
