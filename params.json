@@ -1,0 +1,6 @@
+{
+  "name": "LiquiDOS Cosmos",
+  "tagline": "A Linux-Style Operating System created with COSMOS",
+  "body": "# LiquiDOS-Cosmos\r\nA Linux-Style Operating System created with COSMOS. Currently under active development.  \r\n## Commands  \r\nhelp:   Shows this list again. Usage help [pg#]  \r\nls:     Shows list of files and directories.  \r\nfs:     Lists all the drives.  \r\nrm:     Removes the file. Usage: rm [path]  \r\nrmdir   Removes the directory. Usage: rmdir [path]  \r\ncd:     Change the current directory. Usage: cd [path]  \r\nmkdir:  Makes a directory. Usage: mkdir [patn]  \r\nopen:   Opens and displays contents of a file. Usage: open [path]  \r\nnano:   Opens and edit the contents of a file. Usage: nano [path]  \r\nreboot: Reboots the computer. Usage: reboot [delay ms]  \r\nshutdown: Shutdowns the PC. Usage: shutdown [delay ms]  \r\nclear:  Clear the screen.  \r\necho:   Echoes an input. Usage: echo [text to echo]  \r\nutime:  Returns unix style time.  \r\ngetram: Returns the amount of ram available.  \r\n\r\nTo access the root user use the credentials\r\nUsername:root password:root",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
