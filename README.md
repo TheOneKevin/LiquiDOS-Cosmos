@@ -16,3 +16,6 @@ clear:  Clear the screen.
 echo:   Echoes an input. Usage: echo [text to echo]  
 utime:  Returns unix style time.  
 getram: Returns the amount of ram available.  
+
+To access the root user use the credentials
+Username:root password:root
