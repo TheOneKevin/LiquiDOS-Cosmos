@@ -68,6 +68,13 @@ namespace LiquiDOS
             {
                 Console.Clear();
                 Console.WriteLine("LiquiDOS is getting your OS set up, hang on!");
+                try
+                {
+                    fs.CreateFile("0:\\users.dat");
+                    File.WriteAllText("0:\\users.dat", "$user:root$pswd:root$date:#NAL#$group:01$name:root");
+                    Console.WriteLine(File.ReadAllText("0:\\users.dat"));
+                }
+                catch (Exception e) { Console.WriteLine(e.ToString()); }
                 Console.WriteLine("Created users.dat! Press any key to reboot...");
                 Console.ReadKey();
                 reboot("");
@@ -76,18 +83,7 @@ namespace LiquiDOS
 
         private bool firstTimeUser()
         {
-            if (File.Exists("0:\\users.dat")) //Files inside directory not supported
-                return false;
-            else
-            {
-                try
-                {
-                    fs.CreateFile("0:\\users.dat");
-                    File.WriteAllText("0:\\users.dat", "$user:root$pswd:root$date:#NAL#$group:01$name:root");
-                }
-                catch (Exception e) { Console.WriteLine(e.ToString()); }
-                return true;
-            }
+            return File.Exists("0:\\users.dat"); //Files inside directory not supported
         }
 
         #endregion
@@ -119,8 +115,8 @@ namespace LiquiDOS
                     case "cd": cdDir(input); break;
                     case "utime": time(); date(); break;
                     case "mkdir": mkdir(input); break;
-                    case "rm": rm(input); break;
-                    case "rmdir": rmdir(input); break;
+                    //case "rm": rm(input); break;
+                    //case "rmdir": rmdir(input); break;
                     case "nano": nano(input); break;
                     case "getram": getRam(); break;
                     case "startx": Console.WriteLine("GUI is currently under development, are you sure you want to continue? (y/n):");
@@ -132,7 +128,7 @@ namespace LiquiDOS
                         if (path.Length >= 2)
                             mkfile(path);
                         break;
-                    case "math": break;
+                    case "math": parseMath(input); break;
                     case "user": createUser(input); break;
                     
                     default: error(input); break;
@@ -204,16 +200,16 @@ namespace LiquiDOS
             try
             {
                 if (!File.Exists(cd + path))
-                    VFSManager.CreateFile(cd + path);
+                    fs.CreateFile(cd + path);
                 else if (!File.Exists(path))
-                    VFSManager.CreateFile(path);
+                    fs.CreateFile(path);
                 else
                     Console.WriteLine("File already exists " + path);
             }
             catch (Exception e) { Console.WriteLine(e.Message); }
         }
 
-        private void rmdir(string input)
+        /*private void rmdir(string input)
         {
             //Remove a dir
             string path = input.Trim().Substring(5).Trim(); //rmdir <- 5 chars
@@ -254,7 +250,7 @@ namespace LiquiDOS
                     Console.WriteLine(e.Message);
                 }
             }
-        }
+        }*/
 
         private void mkdir(string input)
         {
@@ -264,9 +260,9 @@ namespace LiquiDOS
             {
                 try
                 {
-                    if (!VFSManager.DirectoryExists(cd + path))
+                    if (!Directory.Exists(cd + path))
                         fs.CreateDirectory(cd + path);
-                    else if (!VFSManager.DirectoryExists(path))
+                    else if (!Directory.Exists(path))
                         fs.CreateDirectory(path);
                     else
                         Console.WriteLine("File/Directory already exists " + cd + path);
@@ -283,9 +279,9 @@ namespace LiquiDOS
             string path = input.Trim().Substring(2).Trim(); //cd <- 2 chars
             try
             {
-                if (VFSManager.DirectoryExists(cd + path))
+                if (Directory.Exists(cd + path))
                     cd = cd + path;
-                else if (VFSManager.DirectoryExists(path))
+                else if (Directory.Exists(path))
                     cd = path;
                 else
                     Console.WriteLine("File does not exist " + cd + path[1]);
@@ -430,28 +426,32 @@ namespace LiquiDOS
 
         private void nano(string input)
         {
-            //Remove a dir
             string path = input.Trim().Substring(4).Trim(); //nano <- 4 chars
-            if (path.Length >= 2)
+            try
             {
-                try
+                Nano fm = new Nano();
+                if (File.Exists(cd + path))
+                    fm.initNano(cd + path);
+                else if (File.Exists(path))
+                    fm.initNano(path);
+                else
                 {
-                    Nano fm = new Nano();
-                    if (File.Exists(cd + path))
-                        fm.initNano(cd + path);
-                    else if (File.Exists(path))
-                        fm.initNano(path);
-                    else
-                    {
-                        mkfile(cd + path);
-                        fm.initNano(cd + path);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
+                    mkfile(cd + path);
+                    fm.initNano(cd + path);
                 }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private void parseMath(string input)
+        {
+            //Remove a dir
+            string ex = input.Trim().Substring(4).Trim(); //math <- 4 chars
+            int res = 0; MathParser.loadAndCalc(ex, ref res);
+            Console.WriteLine("Result: " + res);
         }
 
         private void echo(string input) { Console.WriteLine(input.Trim().Substring(input.Trim().Split(' ')[0].Length)); }

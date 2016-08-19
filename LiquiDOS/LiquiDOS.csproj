@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="IL.cs" />
     <Compile Include="Login.cs" />
+    <Compile Include="MathParser.cs" />
     <Compile Include="Nano.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="AssemblyInfo.cs" />

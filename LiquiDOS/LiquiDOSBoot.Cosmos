@@ -11,8 +11,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Profile>ISO</Profile>
-    <DebugEnabled>False</DebugEnabled>
+    <Profile>VMware</Profile>
+    <DebugEnabled>true</DebugEnabled>
     <DebugMode>Source</DebugMode>
     <TraceMode>User</TraceMode>
     <EnableGDB>False</EnableGDB>
@@ -20,9 +20,9 @@
     <VMWareEdition>Player</VMWareEdition>
     <OutputPath>bin\Debug\</OutputPath>
     <Name>LiquiDOSBoot</Name>
-    <Description>Creates a bootable ISO image which can be burned to a DVD. After running the selected project, an explorer window will open containing the ISO file. The ISO file can then be burned to a CD or DVD and used to boot a physical or virtual system.</Description>
+    <Description>Use VMware Player or Workstation to deploy and debug.</Description>
     <Deployment>ISO</Deployment>
-    <Launch>None</Launch>
+    <Launch>VMware</Launch>
     <VisualStudioDebugPort>Pipe: Cosmos\Serial</VisualStudioDebugPort>
     <PxeInterface>192.168.56.1</PxeInterface>
     <VMware_Name>LiquiDOSBoot</VMware_Name>
@@ -78,6 +78,12 @@
     <IntelEdison_OutputPath>bin\Debug\</IntelEdison_OutputPath>
     <IntelEdison_EnableGDB>False</IntelEdison_EnableGDB>
     <IntelEdison_StartCosmosGDB>false</IntelEdison_StartCosmosGDB>
+    <TraceAssemblies>User</TraceAssemblies>
+    <VMware_TraceAssemblies>User</VMware_TraceAssemblies>
+    <StackCorruptionDetectionLevel>MethodFooters</StackCorruptionDetectionLevel>
+    <VMware_StackCorruptionDetectionLevel>MethodFooters</VMware_StackCorruptionDetectionLevel>
+    <ISO_StackCorruptionDetectionLevel>MethodFooters</ISO_StackCorruptionDetectionLevel>
+    <ISO_TraceAssemblies>User</ISO_TraceAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=".\LiquiDOS.csproj">
